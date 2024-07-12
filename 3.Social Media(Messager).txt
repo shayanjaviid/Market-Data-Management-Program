@@ -1,0 +1,151 @@
+/*
+Imagine that you are tasked with developing a C program that manages market data stored in a file. The data of
+market consists of information about different products, including name, price and quantity. Your program should use
+arrays and structures to read and manipulate this data. Implement a menu-driven program with the following features:
+
+1. Read market data from file:
+Create a structure called Product to represent each product. The structure should have the following members:
+name (string), price (float), and quantity (integer).
+- Declare a set of Product structures to store multiple products.
+- Implement a function to read market data from a file named "market_data.txt" in the structures array. The file format
+it should be the following:
+ProductName1PriceQuantityi
+Product Name2 Price2 Quantity2
+2. Viewing Market Data:
+- Implement a function to view all market data stored in the structure array.
+3. Calculate the total value:
+- Implement a function to calculate the total value of the market data (sum of the product between price and quantity for each
+product).
+4. Amount of Updates:
+- Implement a function to update the quantity of a specific product. Ask the user for the product name and the new one
+amount.
+5. Exit:
+- Implement a function to exit the program.
+
+Requirements:
+Use arrays and structures to store and manage market data.
+- Use a menu-based approach to allow the user to choose different features.
+Implement error handling where appropriate (e.g., file not found, invalid input).
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_PRODUCTS 100
+#define FILENAME "MarketData.txt"
+
+struct Product {
+    char name[50];
+    float price;
+    int quantity;
+};
+struct Product products[MAX_PRODUCTS];
+
+void readMarketData();
+void viewMarketData();
+float calculateTotalValue();
+void updateProductQuantity();
+
+int main() {
+    int choice;
+    int numProducts = 0;
+    
+    readMarketData();
+
+    do {
+        printf("\n\tMENU\t\n");
+        printf(" 1) View Market Data\n");
+        printf(" 2) Calculate Total Value\n");
+        printf(" 3) Update Product Quantity\n");
+        printf(" 0) Exit\n");
+        
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                viewMarketData();
+                break;
+            case 2:
+                printf("Total Market Value: $%.2f\n", calculateTotalValue());
+                break;
+            case 3:
+                updateProductQuantity();
+                break;
+            case 0:
+                printf("Exiting program...\n");
+                exit(EXIT_SUCCESS);
+            default:
+                printf("Invalid choice.\n");
+        }
+        getchar();
+
+    } while (choice != 0);
+
+    return 0;
+}
+
+void readMarketData() {
+    int numProducts = 0;
+
+    FILE *file = fopen(FILENAME, "r");
+    if (file == NULL) {
+        printf("Error opening file for reading.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while (fscanf(file, "%s %f %d", products[numProducts].name, &products[numProducts].price, &products[numProducts].quantity) == 3) {
+        numProducts++;
+        if (numProducts >= MAX_PRODUCTS) {
+            printf("Maximum number of products exceeded.\n");
+            break;
+        }
+    }
+
+    fclose(file);
+}
+
+void viewMarketData() {
+    int numProducts = 0;
+
+    printf("\nMarket Data:\n");
+    for (int i = 0; i < numProducts; i++) {
+        printf("Name: %s, Price: $%.2f, Quantity: %d\n", products[i].name, products[i].price, products[i].quantity);
+    }
+}
+
+float calculateTotalValue() {
+    int numProducts = 0;
+    float totalValue = 0;
+
+    for (int i = 0; i < numProducts; i++) {
+        totalValue += products[i].price * products[i].quantity;
+    }
+
+    return totalValue;
+}
+
+void updateProductQuantity() {
+    int numProducts = 0;
+    char productName[50];
+    int newQuantity;
+
+    printf("Enter the name of the product to update quantity: ");
+    scanf("%s", productName);
+
+    int found = 0;
+    for (int i = 0; i < numProducts; i++) {
+        if (strcmp(products[i].name, productName) == 0) {
+            printf("Enter the new quantity for %s: ", productName);
+            scanf("%d", &newQuantity);
+            products[i].quantity = newQuantity;
+            printf("Quantity updated successfully.\n");
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Product not found.\n");
+    }
+}
